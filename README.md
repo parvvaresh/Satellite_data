@@ -9,6 +9,10 @@ for example :
 
 The new relationships can emerge not only from the first node but from any node in a knowledge graph as shown below and A node or an entity can have multiple relations as well.
 
+We have 2 basic problems:
+1. Compound subjects and objects
+2. Find the main verb of the sentence
+
 in example folder we have use sentences of wikipedia and see result : 
 
 ## for all relation : 
