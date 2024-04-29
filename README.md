@@ -1,32 +1,37 @@
-# Knowledge Graph
-Knowledge graph is one of the valuable tools in data science and it is possible to obtain a general visualization of the data
-A knowledge graph can be created by using the subject and the object in the sentences and the main verb in the sentence.
-Note that sentences must be extracted that have exactly one subject and one object.
+# Data Conversion for Satellite Imagery Analysis
 
-for example :
-![image](https://github.com/parvvaresh/Knowledge-Graph/assets/89921883/de319b2d-9fbb-4e61-8e4d-2a48ca42f7a5)
-![image](https://github.com/parvvaresh/Knowledge-Graph/assets/89921883/9777df33-9198-4b2d-8ed2-d2821dfee0b3)
+## Introduction
+This repository provides Python code for converting satellite data into a format suitable for deep learning models. It supports various deep learning architectures, including Convolutional Neural Networks (CNNs), Recurrent Neural Networks (RNNs), and Long Short-Term Memory networks (LSTMs).
 
-The new relationships can emerge not only from the first node but from any node in a knowledge graph as shown below and A node or an entity can have multiple relations as well.
+## Requirements
+- Python 3.x
+- pandas
+- NumPy
 
-We have 2 basic problems:
-1. Compound subjects and objects
-2. Find the main verb of the sentence
+## Usage
+1. **Clone the Repository**: Clone this repository to your local machine.
+   ```bash
+   git clone https://github.com/your-username/satellite-data-.git
+   ```
+2. **Install Dependencies**: Install the required Python packages if you haven't already.
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **Prepare Your Data**: Replace `satellite_data.csv` with your dataset. Ensure that your CSV file contains satellite data with features and the target variable.
+4. **Customize the Code**: Open and modify `preprocess_satellite_data.py` according to your data preprocessing requirements.
+5. **Run the Script**: Execute the preprocessing script.
+   ```bash
+   python preprocess_satellite_data.py
+   ```
+6. **Check Output**: The preprocessed data will be saved as NumPy arrays (`X_train.npy`, `X_test.npy`, `y_train.npy`, `y_test.npy`) in the same directory.
 
-in example folder we have use sentences of wikipedia and see result : 
+## Preprocessing Steps
+add this section
 
-## for all relation : 
+n the data-saving step as per your requirements.
 
-![example_1](https://github.com/parvvaresh/Knowledge-Graph/assets/89921883/b5b26211-709b-4651-aca2-293f09e4fe26)
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## for "composed by" relation : 
+---
 
-![example_2](https://github.com/parvvaresh/Knowledge-Graph/assets/89921883/a77b423d-5de7-4ede-8443-52848a7b43c2)
-
-## for "written by" relation : 
-
-![example_3](https://github.com/parvvaresh/Knowledge-Graph/assets/89921883/8c940ab4-bf32-4d64-aaee-48df28c14bf9)
-
-## for "released in" relation : 
-
-![example_4](https://github.com/parvvaresh/Knowledge-Graph/assets/89921883/666a3c79-ecbf-479b-940a-9b12a3211f80)
