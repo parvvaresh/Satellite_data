@@ -30,7 +30,6 @@ class convert_data:
         self.class_column = class_column
         self.start_date = start_date
         self.geomfeat_column = geomfeat_columns
-        self.folder_path_data , self.folder_path_META = create_folder_for_save_npy(path)
         
         self.start_date = start_date
         self.step = step
@@ -75,6 +74,7 @@ class convert_data:
                         index : int,
                         day : int,
                         spectrum_vector : dict) -> np.array:
+        
         for spectrum in spectrum_vector:
             if spectrum in self.date_and_spectrum[day]:
                 column = f"{day}_{spectrum}"
