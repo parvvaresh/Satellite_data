@@ -1,11 +1,12 @@
 import numpy as np
 import os
-
-from tool.get_all_npy import get_all_npy
-from tool.save_json import save_json
-from tool.generate_plot import plot_with_number,bar_plot
-from tool.create_folder import create_folder
 from tqdm import tqdm
+
+
+from util import get_all_npy
+from util import save_json
+from util import plot_with_number,bar_plot
+from util import create_folder
 
 
 class report_from_npy:

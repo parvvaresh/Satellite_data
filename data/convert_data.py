@@ -4,15 +4,15 @@ import os
 from datetime import datetime, timedelta
 
 
-from tool.extract_date_and_spectrum import extract_date_and_spectrum
-from tool.get_all_spectrum import get_all_spectrum
-from tool.get_all_day import get_all_day
-from tool.create_folder import create_folder_for_save_npy
-from tool.save_json import save_json
+from util import extract_date_and_spectrum
+from util import get_all_spectrum
+from util import get_all_day
+from util import create_folder_for_save_npy
+from util import save_json
 
-from tool.fix_Meta.fix_date import fix_date
-from tool.fix_Meta.fix_geomfeat import fix_geomfeat
-from tool.fix_Meta.fix_label import fix_label
+from util import fix_date
+from util import fix_geomfeat
+from util import fix_label
 
 
 
