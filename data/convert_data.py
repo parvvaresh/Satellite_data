@@ -41,7 +41,7 @@ class convert_data:
         
         #get data from csv file
         self.date_and_spectrum = extract_date_and_spectrum(df)
-        self.all_spectrcombination_spectrumsums = get_all_spectrum(self.date_and_spectrum)
+        self.all_spectrums = get_all_spectrum(self.date_and_spectrum)
         self.all_date_point = get_all_date(self.date_and_spectrum)
 
 
@@ -71,11 +71,11 @@ class convert_csv_to_npy_pixle(convert_data):
     def get_npy_for_all_sentinel(self) -> None:
         
         # step 0 -> create folder for save .npy format
-        self.root_path = self.path_to_save + "/npy_data_for_all_sentinel"
-        create_folder(self.root_path)
+        root_path = self.path_to_save + "/npy_data_for_all_sentinel"
+        create_folder(root_path)
         
-        self.npy_folder = self.root_path + "/DATA"
-        create_folder(self.npy_folder)
+        npy_folder = root_path + "/DATA"
+        create_folder(npy_folder)
         
         # step 1 -> iteration in dataframe for get row(point)
         for index in tqdm(range(self.df.shape[0])):
@@ -93,9 +93,9 @@ class convert_csv_to_npy_pixle(convert_data):
             """
             for date in self.all_date_point:
                 # step 2.2 -> creats vecotrs for spectrum 
-                spectrum_vector = self._create_vector_spectrums()
+                spectrum_vector = self._create_vector_spectrums(self.all_spectrums)
                 # step 2.3 -> make creating vecotrs for each date
-                vector_day = self._make_vector_for_each_date(index, date, spectrum_vector)
+                vector_day = self._make_vector_for_each_date(index, date, spectrum_vector, self.date_and_spectrum)
                 # step 2.4 -> save data in list for each date
                 vector.append(vector_day)
             
@@ -112,29 +112,26 @@ class convert_csv_to_npy_pixle(convert_data):
         # step 5 -> save META data
         # step 6 -> create folder for save META data
         
-        self.meta_folder = self.root_path + "/META"
-        create_folder(self.meta_folder)
+        meta_folder = root_path + "/META"
+        create_folder(meta_folder)
         
         # step 7 -> extract data from dataframe
-        
-        geomfeat = fix_geomfeat(self.df , self.geomfeat_column)
-        label = fix_label(self.df, self.class_column)
-        date = fix_date(self.start_date , self.step , self.iter)
-        
-        
-        # step 8 -> save it
-        save_json(self.meta_folder + "/geomfeat.json", geomfeat)
-        print("geomfeat METADATA saved successfully")
-        
-        save_json(self.meta_folder + "/label.json", label)
-        print("label METADATA saved successfully")
+        self._saved_meta_data(meta_folder)
 
-        save_json(self.meta_folder + "/date.json", date)
-        print("date METADATA saved successfully")
     
     
     def get_npy_track_sentinel(self) -> None:
-        # step 1 -> track spectrum 
+        
+        # step 0 : make folder for save it 
+        
+        root_path = "/home/reza/Desktop" + "/npy_data_for_track_sentinel"
+        create_folder(root_path)
+
+        npy_folder = root_path + "/DATA"
+        create_folder(npy_folder)
+        
+        # step 1 -> track spectrum (sentinel 1 and sentinel 2)
+        
         """
         
          s2 = (b1 , b2 , b3 , b4 , b5 , b6 , b7) and more
@@ -142,14 +139,126 @@ class convert_csv_to_npy_pixle(convert_data):
          A combination of one and two
          
         """
+        
+        track_sentinel_date_and_spectrum = track_sentinel(self.date_and_spectrum)
+        
+        # step 2 -> get date and spectrum for each sentinel
+        s1_date_and_spectrum = track_sentinel_date_and_spectrum["s1"]
+        s2_date_and_spectrum = track_sentinel_date_and_spectrum["s2"]
+        combintion_date_and_spectrum = track_sentinel_date_and_spectrum["combination"]
+        
+        # step 3 -> get all spectrum for each sentinel 
+        s1_all_spectrum  = get_all_spectrum(track_sentinel_date_and_spectrum["s1"])
+        s2_all_spectrum = get_all_spectrum(track_sentinel_date_and_spectrum["s2"])
+        combintion_all_spectrum = get_all_spectrum(track_sentinel_date_and_spectrum["combination"])
+        
+        # step 3 -> iteration in dataframe for get row(point)
+        for index in tqdm(range(self.df.shape[0])):
+            # step 4 -> start convert each point to .npy format file
+
+            
+            # step 5.1
+            """
+            
+                in one pixle data we have data 
+                and shape it is : (24, 10) 
+                means we have 24 dates and for each dates have spectrum
+                and we shoud itereations in dates and save data for each date
+                
+            """
+            s1 = self._create_vector_for_espcial_sentinel(
+                s1_all_spectrum,
+                s1_date_and_spectrum,
+                index
+                
+            )
+
+            s2 = self._create_vector_for_espcial_sentinel(
+                s2_all_spectrum,
+                s2_date_and_spectrum,
+                index
+                
+            )
+
+            combintion = self._create_vector_for_espcial_sentinel(
+                combintion_all_spectrum,
+                combintion_date_and_spectrum,
+                index
+                
+            )
+            
+            file_path_index = npy_folder + f"/{index}"
+            create_folder(file_path_index)
+            
+            path =  file_path_index + f"/s1.npy"
+            np.save(path, s1)
+        
+            path =  file_path_index + f"/s2.npy"
+            np.save(path, s2)
+
+            path =  file_path_index + f"/combintion.npy"
+            np.save(path, combintion)
+        
+            
+        print("saved npy files in path")
+    
+    
+        meta_folder = root_path + "/META"
+        create_folder(meta_folder)
+        
+        self._saved_meta_data(meta_folder)
+        
+        
+        
 
 
+    def _saved_meta_data(self,
+                         path : str) -> None:
+
+        # step 1 - > extract data
+        geomfeat = fix_geomfeat(self.df , self.geomfeat_column)
+        label = fix_label(self.df, self.class_column)
+        date = fix_date(self.start_date , self.step , self.iter)
+    
+        
+        # step 2 -> save it
+        save_json(path + "/geomfeat.json", geomfeat)
+        print("geomfeat METADATA saved successfully")
+        
+        save_json(path + "/label.json", label)
+        print("label METADATA saved successfully")
+
+        save_json(path + "/date.json", date)
+        print("date METADATA saved successfully")
+        
+
+
+    def _create_vector_for_espcial_sentinel(self,
+                                            all_spectrums : list,
+                                            date_and_spectrums : dict,
+                                            index : int) -> np.array:
+        
+        
+        vector = list()
+        for date in self.all_date_point:
+            # step 1 -> creats vecotrs for spectrum 
+            spectrum_vector = self._create_vector_spectrums(all_spectrums)
+            # step 2 -> make creating vecotrs for each date
+            vector_day = self._make_vector_for_each_date(index, date, spectrum_vector, date_and_spectrums)
+            # step 3 -> save data in list for each date
+            vector.append(vector_day)
+            
+        # step 4 -> conver data to np.array type
+        vector = np.array(vector)
+        return vector
         
                     
     def _make_vector_for_each_date(self, 
                         index : int,
                         date : int,
-                        spectrum_vector : dict) -> np.array:
+                        spectrum_vector : dict,
+                        date_and_spectrum : dict) -> np.array:
+
         
         
         """
@@ -160,7 +269,7 @@ class convert_csv_to_npy_pixle(convert_data):
         """
         
         for spectrum in spectrum_vector:
-            if spectrum in self.date_and_spectrum[date]:
+            if spectrum in date_and_spectrum[date]:
                 column = f"{date}_{spectrum}"
                 spectrum_vector[spectrum] = self.df.iloc[index][column]
 
@@ -168,14 +277,14 @@ class convert_csv_to_npy_pixle(convert_data):
                         list(spectrum_vector.values())
                            )
                 
-    def _create_vector_spectrums(self) -> dict:
+    def _create_vector_spectrums(self, spectrums : list) -> dict:
         """
         
          in this function we have to create a vector for spectrum and defeault nan  values
          
         """
         return {spectrum: np.nan 
-                    for spectrum in self.all_spectrums}
+                    for spectrum in spectrums}
     
     
     
@@ -193,6 +302,6 @@ m = convert_csv_to_npy_pixle(df = df,
                  step = 3,
                  iter = 20)
 
-print(track_sentinel(m.date_and_spectrum))
+m.get_npy_track_sentinel()
 
 

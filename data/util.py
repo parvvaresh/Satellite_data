@@ -132,35 +132,38 @@ def get_all_npy(path : str) -> dict:
                 files[name] = os.path.join(root, file) 
     return files
 
-def track_sentinel(date_and_spectrum : dict) -> dict :
+
+
+def track_sentinel(date_and_spectrum: dict) -> dict:
     spectrums_list = get_spectrums()
-    print(spectrums_list)
     s1 = dict()
     s2 = dict()
     combination = dict()
     
-    for date , spectrums in date_and_spectrum.items():
-        s1_spectrums = list()
-        s2_spectrums = list()
-        combination_spectrums = list()
+    for date, spectrums in date_and_spectrum.items():
+        s1_spectrums = []
+        s2_spectrums = []
+        combination_spectrums = []
         
         for spectrum in spectrums:
-            if spectrum in spectrums_list[s1]:
+            if spectrum in spectrums_list["s1"]:
                 s1_spectrums.append(spectrum)
-            elif spectrum in spectrums_list[s2]:
+            elif spectrum in spectrums_list["s2"]:
                 s2_spectrums.append(spectrum)
             else:
                 combination_spectrums.append(spectrum)
         
         s1[date] = s1_spectrums
         s2[date] = s2_spectrums
-        combination[date] = combination
+        combination[date] = combination_spectrums
         
-        return {
-            "s1" : s1,
-            "s2" : s2,
-            "combination" : combination
-        }
+    return {
+        "s1": s1,
+        "s2": s2,
+        "combination": combination
+    }
+
+
 """
     
 """
