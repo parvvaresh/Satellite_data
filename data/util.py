@@ -69,17 +69,19 @@ def find_date_and_spectrum(text : str) -> list:
     
 
 
-def extract_date_and_spectrum(df : pd.DataFrame,
-                              stopwords : list) -> dict:
+def extract_date_and_spectrum(df : pd.DataFrame) -> dict:
     """
         this founction for extract date and spectrum for .csv file format
     """
 
+    with open("stopwords.json", "r") as json_file:
+        stopwords = json.load(json_file)
+        
     columns= list(df.columns)
     
     columns = [_info for _info in columns if _info not in stopwords]
     date_and_spectrum = dict()
-    info = list(map(find_date_and_spectrum, info))
+    info = list(map(find_date_and_spectrum, columns))
         
     for _info in info:
         day, spectrum = int(_info[0]) , _info[1] 
@@ -94,7 +96,7 @@ def extract_date_and_spectrum(df : pd.DataFrame,
     return date_and_spectrum
 
 
-def get_all_day(date_and_spectrum : dict) -> list:
+def get_all_date(date_and_spectrum : dict) -> list:
     """
 
     """
