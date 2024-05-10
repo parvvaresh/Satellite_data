@@ -14,6 +14,7 @@ from util import fix_date
 from util import fix_geomfeat
 from util import fix_label
 from util import track_sentinel
+from util import saved_meta_data
 
 
 class convert_data:
@@ -31,8 +32,7 @@ class convert_data:
         self.df = df
         self.class_column = class_column
         self.start_date = start_date
-        self.geomfeat_column = geomfeat_columns
-        
+        self.geomfeat_columns = geomfeat_columns
         self.start_date = start_date
         self.step = step
         self.iter = iter
@@ -116,8 +116,13 @@ class convert_csv_to_npy_pixle(convert_data):
         create_folder(meta_folder)
         
         # step 7 -> extract data from dataframe
-        self._saved_meta_data(meta_folder)
-
+        saved_meta_data(meta_folder,
+                        self.df, 
+                        self.geomfeat_column,
+                        self.class_column,
+                        self.start_date,
+                        self.step ,
+                        self.iter)
     
     
     def get_npy_track_sentinel(self) -> None:
@@ -206,13 +211,18 @@ class convert_csv_to_npy_pixle(convert_data):
         meta_folder = root_path + "/META"
         create_folder(meta_folder)
         
-        self._saved_meta_data(meta_folder)
-        
+        saved_meta_data(meta_folder,
+                        self.df, 
+                        self.geomfeat_columns,
+                        self.class_column,
+                        self.start_date,
+                        self.step ,
+                        self.iter)        
         
         
 
 
-    def _saved_meta_data(self,
+    def saved_meta_data(self,
                          path : str) -> None:
 
         # step 1 - > extract data
