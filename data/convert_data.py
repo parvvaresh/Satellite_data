@@ -13,7 +13,7 @@ from util import create_folder
 from util import fix_date
 from util import fix_geomfeat
 from util import fix_label
-
+from util import track_sentinel
 
 
 class convert_data:
@@ -41,7 +41,7 @@ class convert_data:
         
         #get data from csv file
         self.date_and_spectrum = extract_date_and_spectrum(df)
-        self.all_spectrums = get_all_spectrum(self.date_and_spectrum)
+        self.all_spectrcombination_spectrumsums = get_all_spectrum(self.date_and_spectrum)
         self.all_date_point = get_all_date(self.date_and_spectrum)
 
 
@@ -64,7 +64,6 @@ class convert_csv_to_npy_pixle(convert_data):
                        iter)
         
         
-        # create root path folder
 
                 
         
@@ -135,7 +134,14 @@ class convert_csv_to_npy_pixle(convert_data):
     
     
     def get_npy_track_sentinel(self) -> None:
-        pass
+        # step 1 -> track spectrum 
+        """
+        
+         s2 = (b1 , b2 , b3 , b4 , b5 , b6 , b7) and more
+         s1 = (vv, vh , hv, hh)
+         A combination of one and two
+         
+        """
 
 
         
@@ -175,5 +181,18 @@ class convert_csv_to_npy_pixle(convert_data):
     
 
     
+
+
+df = pd.read_excel("/home/reza/Desktop/BAHAR_DATA_S1_S2_0301_0630.xlsx")
+
+m = convert_csv_to_npy_pixle(df = df, 
+                 class_column = "Name",
+                 geomfeat_columns = ("X", "Y"),
+                 path_to_save = "/home/reza/Desktop",
+                 start_date = datetime(2012, 2, 2),
+                 step = 3,
+                 iter = 20)
+
+print(track_sentinel(m.date_and_spectrum))
 
 

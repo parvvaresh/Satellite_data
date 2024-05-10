@@ -6,6 +6,8 @@ import seaborn as sns
 import json
 from datetime import datetime, timedelta
 
+from data.parser import get_spectrums, get_stopwords
+
 
 
 def create_folder(path : str) -> None:
@@ -74,8 +76,7 @@ def extract_date_and_spectrum(df : pd.DataFrame) -> dict:
         this founction for extract date and spectrum for .csv file format
     """
 
-    with open("stopwords.json", "r") as json_file:
-        stopwords = json.load(json_file)
+    stopwords = get_stopwords()
         
     columns= list(df.columns)
     
@@ -131,8 +132,35 @@ def get_all_npy(path : str) -> dict:
                 files[name] = os.path.join(root, file) 
     return files
 
-
-
+def track_sentinel(date_and_spectrum : dict) -> dict :
+    spectrums_list = get_spectrums()
+    print(spectrums_list)
+    s1 = dict()
+    s2 = dict()
+    combination = dict()
+    
+    for date , spectrums in date_and_spectrum.items():
+        s1_spectrums = list()
+        s2_spectrums = list()
+        combination_spectrums = list()
+        
+        for spectrum in spectrums:
+            if spectrum in spectrums_list[s1]:
+                s1_spectrums.append(spectrum)
+            elif spectrum in spectrums_list[s2]:
+                s2_spectrums.append(spectrum)
+            else:
+                combination_spectrums.append(spectrum)
+        
+        s1[date] = s1_spectrums
+        s2[date] = s2_spectrums
+        combination[date] = combination
+        
+        return {
+            "s1" : s1,
+            "s2" : s2,
+            "combination" : combination
+        }
 """
     
 """
