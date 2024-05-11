@@ -6,5 +6,8 @@
     "RAND",
     "gridcode",
     "X",
-    "Y"
+    "Y",
+    "gridcode",
+    "FID_BLOCK_",
+    "FID_GRIDE"
 ]
