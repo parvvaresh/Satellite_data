@@ -113,4 +113,6 @@ class report_from_npy:
             
         
                 
-            
+
+def get_number_of_point_for_each_class(classes : dict) -> None:
+    pass
