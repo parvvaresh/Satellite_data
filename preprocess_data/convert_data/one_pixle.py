@@ -128,7 +128,7 @@ class convert_csv_to_npy_pixle(convert_data):
                    
             """
                 step 2.1 -> 
-                            We have one-pixel data in NPY format
+                            We have one-pixel data in .npy format
                             (24, 10)
                             This means that we have 24 dates or periods of history and each date point has 10 spectrums
                             This is how the data should be
@@ -196,49 +196,82 @@ class convert_csv_to_npy_pixle(convert_data):
     
     def get_npy_track_sentinel(self) -> None:
         
-        # step 0 : make folder for save it 
-        
-        root_path = "/home/reza/Desktop" + "/npy_data_for_track_sentinel"
-        create_folder(root_path)
+        """
+                Here, we pay attention to which satellite each spectrum is for and separate them, 
+                pre-process the data and convert it to npy format data.
+                We explain this step by step
 
+        """
+        
+
+        #----------------------------------------------------------------
+        
+        """
+            step 0 -> 
+                        create folder for save .npy format and meta data
+        """
+        
+        root_path = self.path_to_save + "/npy_data_for_track_sentinel"
+        create_folder(root_path)
+        
+        """
+            step 0.1 -> 
+                        create folder for save .npy format especially
+        """      
+        
         npy_folder = root_path + "/DATA"
         create_folder(npy_folder)
         
-        # step 1 -> track spectrum (sentinel 1 and sentinel 2)
         
         """
-        
-         s2 = (b1 , b2 , b3 , b4 , b5 , b6 , b7) and more
-         s1 = (vv, vh , hv, hh)
-         A combination of one and two
+            step 1 ->
+                The spectra of each satellite are separated
+                Combined spectra that do not belong to any satellite are stored in a separate file under the name of combined
          
         """
         
         track_sentinel_date_and_spectrum = track_sentinel(self.date_and_spectrum)
         
-        # step 2 -> get date and spectrum for each sentinel
+        
+        
+        """
+            step 2 ->     
+                    Here we see what spectrum each date has for each satellite
+
+        """
         s1_date_and_spectrum = track_sentinel_date_and_spectrum["s1"]
         s2_date_and_spectrum = track_sentinel_date_and_spectrum["s2"]
         combintion_date_and_spectrum = track_sentinel_date_and_spectrum["combination"]
         
-        # step 3 -> get all spectrum for each sentinel 
+        """
+            step 3 -> 
+                        For each satellite, we extract all its spectra
+        """
         s1_all_spectrum  = get_all_spectrum(track_sentinel_date_and_spectrum["s1"])
         s2_all_spectrum = get_all_spectrum(track_sentinel_date_and_spectrum["s2"])
         combintion_all_spectrum = get_all_spectrum(track_sentinel_date_and_spectrum["combination"])
         
-        # step 3 -> iteration in dataframe for get row(point)
-        for index in tqdm(range(self.df.shape[0])):
-            # step 4 -> start convert each point to .npy format file
 
-            
-            # step 5.1
+        """
+            step 4 -> 
+                        iteration in dataframe for get row(point)
+                        Each line of the dataframe represents a point 
+                        with characteristics related to spectrum and date
+        """
+        
+        for index in tqdm(range(self.df.shape[0])):
+
+
             """
-            
-                in one pixle data we have data 
-                and shape it is : (24, 10) 
-                means we have 24 dates and for each dates have spectrum
-                and we shoud itereations in dates and save data for each date
+                    
+                step 4.1 -> 
+                            We have one-pixel data in .npy format
+                            (24, 10)
+                            This means that we have 24 dates or periods of history and each date point has 10 spectrums
+                            This is how the data should be
+                            We do this for each satellite 
                 
+        
             """
             s1 = self._create_vector_for_espcial_sentinel(
                 s1_all_spectrum,
@@ -261,6 +294,16 @@ class convert_csv_to_npy_pixle(convert_data):
                 
             )
             
+            
+            """
+                step 5 ->
+                        We save the extracted data in the presentation format of the pie name and save the index that is in the data frame.
+                        For example : 
+                                    1.npy
+                                    The first row is in our data frame
+                                    We do this for each satellite 
+            """   
+            
             file_path_index = npy_folder + f"/{index}"
             create_folder(file_path_index)
             
@@ -276,6 +319,16 @@ class convert_csv_to_npy_pixle(convert_data):
             
         print("saved npy files in path")
     
+    
+        """
+            step 5 -> 
+                    Metadata includes the information included : 
+                                                                1. lable
+                                                                2. Longitude latitude
+                                                                3. **Time
+
+                    ** The meaning of time means the first presentation in the NPY file, exactly what date does it mean
+        """
     
         meta_folder = root_path + "/META"
         create_folder(meta_folder)
@@ -300,16 +353,24 @@ class convert_csv_to_npy_pixle(convert_data):
                                             index : int) -> np.array:
         
         
+    
+        """
+                    We know that every date includes taking spectrum characteristics, so we have to move on the date from the beginning
+
+                    We create a vector of spectra for each date and set its default value to np.nan
+                    And then we will see if the desired spectrum is available on that date
+                    If there is, we replace its value, and if not, the default value remains
+                    Then, for each date, the obtained vector is stored in the same vector that we created at the beginning
+                            
+        """
+        
+        
         vector = list()
         for date in self.all_date_point:
-            # step 1 -> creats vecotrs for spectrum 
             spectrum_vector = self._create_vector_spectrums(all_spectrums)
-            # step 2 -> make creating vecotrs for each date
             vector_day = self._make_vector_for_each_date(index, date, spectrum_vector, date_and_spectrums)
-            # step 3 -> save data in list for each date
             vector.append(vector_day)
             
-        # step 4 -> conver data to np.array type
         vector = np.array(vector)
         return vector
         
@@ -323,10 +384,8 @@ class convert_csv_to_npy_pixle(convert_data):
         
         
         """
-            in this function we create a vector for each date
-            frist we collect all spectrum for each date
-            step 1 -> we check spectrum in this daye is existing?
-            if existing generation columns and extract data nd save it 
+            First, we can see that on the specified date, if it is the range we want, 
+            it will reconstruct the column according to the format and save its information.
         """
         
         for spectrum in spectrum_vector:
