@@ -184,7 +184,7 @@ class EarthEngineData:
         
     
     
-    def fit(self,
+    def pipline(self,
             start_date : str,
             finish_data : str,
             path_to_save : str) -> None:
@@ -195,3 +195,15 @@ class EarthEngineData:
         self.model.process_sentinel2(start_date)
         self.combine_sentinel1_sentinel2(self.stack_sentinel1, self.indicesImageallband)
         self.export_data(self.maineMODFeatures)
+
+
+
+with open('/home/reza/Downloads/KABUDARAHANG_SAMPLE.geojson', 'r') as f:
+    geoJSON = json.load(f)
+
+coords = [[feature['geometry']['coordinates'][0][0], feature['geometry']['coordinates'][0][1]] for feature in geoJSON['features']]
+aoi = ee.Geometry.Polygon(coords)
+
+
+model = EarthEngineData(aoi)
+model.pipline("2023-01-01", "2023-12-01", "/home/reza/Desktop")

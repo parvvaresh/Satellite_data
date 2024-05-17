@@ -6,7 +6,7 @@ import seaborn as sns
 import json
 from datetime import datetime, timedelta
 
-from data.parser import get_spectrums, get_stopwords
+from .data.parser import get_spectrums, get_stopwords
 
 
 

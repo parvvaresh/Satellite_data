@@ -27,7 +27,7 @@ class convert_data:
                  step : int,
                  iter : int) -> None:
         
-        #intialize pharameter
+        
         
         self.df = df
         self.class_column = class_column
@@ -41,9 +41,7 @@ class convert_data:
         
         
         #get data from csv file
-        self.date_and_spectrum = extract_date_and_spectrum(df)
-        self.all_spectrums = get_all_spectrum(self.date_and_spectrum)
-        self.all_date_point = get_all_date(self.date_and_spectrum)
+
 
 
 class convert_csv_to_npy_pixle(convert_data):
