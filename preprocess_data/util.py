@@ -6,7 +6,7 @@ import seaborn as sns
 import json
 from datetime import datetime, timedelta
 
-from .data.parser import get_spectrums, get_stopwords
+from data.parser import get_spectrums, get_stopwords
 
 
 
@@ -35,19 +35,49 @@ def bar_plot(data : dict,
     
     
 
-def save_json(path: str,
-              data: dict) -> None:
+import json
+import os
+
+def convert_to_json_serializable(obj):
     """
-        this foucntion for convert dictionary type to json and save it
+    Custom converter function to handle non-serializable objects.
     """
-    def convert_to_json_serializable(obj):
-        if isinstance(obj, np.uint16):
-            return int(obj)
-        else:
-            return obj
+    try:
+        return json.JSONEncoder().default(obj)
+    except TypeError:
+        return str(obj)  # Convert to string as a fallback
+
+def remove_circular_references(obj, seen=None):
+    """
+    Recursively remove circular references from the data.
+    """
+    if seen is None:
+        seen = set()
+    if id(obj) in seen:
+        return None  # Circular reference found; replace with None or a placeholder
+    seen.add(id(obj))
+
+    if isinstance(obj, dict):
+        return {k: remove_circular_references(v, seen) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [remove_circular_references(i, seen) for i in obj]
+    elif isinstance(obj, tuple):
+        return tuple(remove_circular_references(i, seen) for i in obj)
+    elif isinstance(obj, set):
+        return {remove_circular_references(i, seen) for i in obj}
     
+    return obj
+
+def save_json(path, data):
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    # Remove circular references before saving
+    data = remove_circular_references(data)
+
     with open(path, "w") as json_file:
         json.dump(data, json_file, indent=4, default=convert_to_json_serializable)
+
 
 
 def find_date_and_spectrum(text : str) -> list:
@@ -107,7 +137,27 @@ def get_all_date(date_and_spectrum : dict) -> list:
         all_day.append(day)
     return all_day
 
+def point_plot(data,
+               path : str,
+               x_lable : str,
+               y_lable : str,
+               title : str):
+    
+    plt.figure(figsize=(15, 10))
 
+    x = list(data.keys())
+    y = list(data.values())
+    x = list(map(lambda x : str(x), x))
+
+    for _x, _y in zip(x, y):
+        plt.text(_x, _y, f'{_y:.0f}', fontsize=9, ha='center', va='bottom')
+    plt.plot(x, y, marker='o', linestyle='--')
+    plt.xlabel(x_lable)
+    plt.ylabel(y_lable)
+    plt.title(title)
+    plt.grid(True)
+    plt.savefig(path)
+    plt.close()
 
 def get_all_spectrum(date_and_spectrum : dict) -> list:
     
@@ -119,8 +169,17 @@ def get_all_spectrum(date_and_spectrum : dict) -> list:
 
 
 
-
-
+def counter_class(df : pd.DataFrame,
+                  class_columns : str) -> None:
+    counter = {}
+    classes = df[class_columns]
+    for _class in classes:
+        if _class in counter:
+            counter[_class] += 1
+        elif _class not in counter:
+            counter[_class] = 0
+    counter = dict(sorted(counter.items(), key=lambda item:item[0]))
+    return counter
 
 
 def get_all_npy(path : str) -> dict:

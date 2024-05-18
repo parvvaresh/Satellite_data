@@ -11,7 +11,7 @@ project_root = os.path.abspath(os.path.join(current_dir, "../.."))
 sys.path.append(project_root)
 
 
-from convert_data import convert_data
+from .convert_data import _convert_data
 from preprocess_data.util import extract_date_and_spectrum
 from preprocess_data.util import get_all_spectrum
 from preprocess_data.util import save_json
@@ -21,15 +21,14 @@ from preprocess_data.util import fix_geomfeat
 from preprocess_data.util import fix_label
 from preprocess_data.util import track_sentinel
 from preprocess_data.util import saved_meta_data
-
-
+from preprocess_data.util import get_all_date
 
         
         
 
 
 
-class convert_csv_to_npy(convert_data):
+class convert_csv_to_npy(_convert_data):
     def __init__(self,
                  df : pd.DataFrame, 
                  class_column : str,
@@ -88,6 +87,10 @@ class convert_csv_to_npy(convert_data):
                         Each line of the dataframe represents a point 
                         with characteristics related to spectrum and date
         """
+        
+        date_and_spectrum = extract_date_and_spectrum(self.df)
+        all_date_point = get_all_date(date_and_spectrum)
+        all_spectrums = get_all_spectrum(date_and_spectrum)
         for index in tqdm(range(self.df.shape[0])):
             """
                 step 2 -> 
@@ -104,7 +107,7 @@ class convert_csv_to_npy(convert_data):
                             This is how the data should be
                 
             """
-            for date in self.all_date_point:
+            for date in all_date_point:
                 
                 """
                     step 3 -> 
@@ -116,8 +119,8 @@ class convert_csv_to_npy(convert_data):
                             Then, for each date, the obtained vector is stored in the same vector that we created at the beginning
                             
                 """
-                spectrum_vector = self._create_vector_spectrums(self.all_spectrums)
-                vector_day = self._make_vector_for_each_date(index, date, spectrum_vector, self.date_and_spectrum)
+                spectrum_vector = self._create_vector_spectrums(all_spectrums)
+                vector_day = self._make_vector_for_each_date(index, date, spectrum_vector, date_and_spectrum)
                 vector.append(vector_day)
             
             
@@ -131,7 +134,7 @@ class convert_csv_to_npy(convert_data):
                         
             """            
             vector = np.array(vector)
-            path =  self.npy_folder + f"/{index}.npy"
+            path =  npy_folder + f"/{index}.npy"
             np.save(path, vector)
         print("---> saved npy files in path")
 
@@ -155,7 +158,7 @@ class convert_csv_to_npy(convert_data):
         
         saved_meta_data(meta_folder,
                         self.df, 
-                        self.geomfeat_column,
+                        self.geomfeat_columns,
                         self.class_column,
                         self.start_date,
                         self.step ,
@@ -200,7 +203,11 @@ class convert_csv_to_npy(convert_data):
          
         """
         
-        track_sentinel_date_and_spectrum = track_sentinel(self.date_and_spectrum)
+        date_and_spectrum = extract_date_and_spectrum(self.df)
+        all_date_point = get_all_date(date_and_spectrum)
+        all_spectrums = get_all_spectrum(date_and_spectrum)
+        
+        track_sentinel_date_and_spectrum = track_sentinel(date_and_spectrum)
         
         
         
@@ -246,21 +253,24 @@ class convert_csv_to_npy(convert_data):
             s1 = self._create_vector_for_espcial_sentinel(
                 s1_all_spectrum,
                 s1_date_and_spectrum,
-                index
+                index,
+                all_date_point
                 
             )
 
             s2 = self._create_vector_for_espcial_sentinel(
                 s2_all_spectrum,
                 s2_date_and_spectrum,
-                index
+                index,
+                all_date_point
                 
             )
 
             combintion = self._create_vector_for_espcial_sentinel(
                 combintion_all_spectrum,
                 combintion_date_and_spectrum,
-                index
+                index,
+                all_date_point
                 
             )
             
@@ -320,7 +330,8 @@ class convert_csv_to_npy(convert_data):
     def _create_vector_for_espcial_sentinel(self,
                                             all_spectrums : list,
                                             date_and_spectrums : dict,
-                                            index : int) -> np.array:
+                                            index : int,
+                                            all_date_point : list) -> np.array:
         
         
     
@@ -336,7 +347,7 @@ class convert_csv_to_npy(convert_data):
         
         
         vector = list()
-        for date in self.all_date_point:
+        for date in all_date_point:
             spectrum_vector = self._create_vector_spectrums(all_spectrums)
             vector_day = self._make_vector_for_each_date(index, date, spectrum_vector, date_and_spectrums)
             vector.append(vector_day)

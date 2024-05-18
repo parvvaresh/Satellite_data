@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 
-class convert_data:
+class _convert_data:
     def __init__(self,
                  df : pd.DataFrame, 
                  class_column : str,
