@@ -22,8 +22,7 @@ from util import saved_meta_data
 from util import get_all_date
 from util import point_plot
 from util import counter_class
-
-
+from report_from_npy import report_from_npy
 
 def pipeline_one_pixle(df :pd.DataFrame,
              class_column : str,
@@ -231,6 +230,12 @@ def pipeline_block_pixle(df :pd.DataFrame,
 
     model.get_npy_track_sentinel()
     print("---> save .npy format files for special sentinel")
+    
+    
+    """
+        step 5 -> sequence of pixle of data
+    """
+    
     
 # #df =pd.read_excel("/home/reza/Desktop/BAHAR_DATA_S1_S2_0301_0630.xlsx")
 

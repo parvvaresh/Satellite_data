@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from util import get_all_npy
 from util import save_json
-from util import plot_with_number,bar_plot
+from util import point_plot
 from util import create_folder
 
 
@@ -51,7 +51,7 @@ class report_from_npy:
         
         # step 3.2 -> save plot
         path_to_save_plot = path_to_save + "/pixle_for_each_file.png"
-        plot_with_number(self.all_pixle_for_each_file,
+        point_plot(self.all_pixle_for_each_file,
              path_to_save_plot)
         print(f"saved png file in this directory -> {path_to_save}")    
     
@@ -108,11 +108,12 @@ class report_from_npy:
 
             for index , _data in data.items():
                 path_temp = path_plot + f"/{index}.png"
-                bar_plot(_data, path_temp)           
-                #print(f"saved plot {name} file in this directory -> {path_temp}")
+                point_plot(_data, path_temp, "spectrum", "number", "discrabtion of pixle")           
+                print(f"saved plot {name} file in this directory -> {path_temp}")
             
         
                 
 
 def get_number_of_point_for_each_class(classes : dict) -> None:
     pass
+
