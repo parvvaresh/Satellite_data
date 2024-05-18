@@ -11,7 +11,7 @@ project_root = os.path.abspath(os.path.join(current_dir, "../.."))
 sys.path.append(project_root)
 
 
-from convert_data import convert_data
+from .convert_data import _convert_data
 from preprocess_data.util import extract_date_and_spectrum
 from preprocess_data.util import get_all_spectrum
 from preprocess_data.util import save_json
@@ -25,7 +25,7 @@ from preprocess_data.util import get_all_date
 
 
 
-class convert_csv_to_npy(convert_data):
+class convert_csv_to_npy(_convert_data):
     def __init__(self,
                  df : pd.DataFrame, 
                  class_column : str,
