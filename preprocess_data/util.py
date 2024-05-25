@@ -191,6 +191,16 @@ def get_all_npy(path : str) -> dict:
                 files[name] = os.path.join(root, file) 
     return files
 
+def elminate_date(npy_files : list,
+                 list_dates : list) -> np.array:
+    files_result = {}
+    for name , npy_file in npy_files.items():
+        data = np.load(npy_file)
+        for date in list_dates:
+            matrix_date = data[date]
+            data[date] = np.zeros(matrix_date.shape)
+        files_result[name] = data
+    return files_result
 
 
 def track_sentinel(date_and_spectrum: dict) -> dict:
