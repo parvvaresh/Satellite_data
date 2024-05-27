@@ -143,8 +143,12 @@ class EarthEngineData:
 
 
     def combine_sentinel1_sentinel2(self, stack_sentinel1, indicesImageallband) -> None:
+        """
+
+        """
 
         combined_features = stack_sentinel1.addBands(indicesImageallband)
+        
         self.maineMODFeatures = combined_features.reduceRegions(
             collection=self.aoi,
             reducer=ee.Reducer.mean(),

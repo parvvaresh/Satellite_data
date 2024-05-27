@@ -10,7 +10,7 @@ def split_test_train(path_file_npy : str,
     
     npy_files = list(get_all_npy(path_file_npy).values())
     number_test = int(
-            len(path_file_npy) * test_size)
+            len(npy_files) * test_size)
     
     
     test_data = random.sample(npy_files, number_test)
