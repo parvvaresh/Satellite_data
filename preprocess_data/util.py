@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import json
 from datetime import datetime, timedelta
+import shutil
+
 
 from data.parser import get_spectrums, get_stopwords
 
@@ -34,9 +36,6 @@ def bar_plot(data : dict,
     plt.close()
     
     
-
-import json
-import os
 
 def convert_to_json_serializable(obj):
     """
@@ -295,3 +294,9 @@ def saved_meta_data(path : str,
 
     save_json(path + "/date.json", date)
     print("date METADATA saved successfully")
+    
+    
+
+def copy_paste(source_file : str,
+               destination_dir : str) -> None:    
+    shutil.copy2(source_file, destination_dir)
