@@ -38,5 +38,4 @@ def split_test_train(path_file_npy : str,
     
     print("test / train saved in path ...")
 
-split_test_train("/home/reza/Desktop/DATA", "/home/reza/Desktop", 0.2)
 
