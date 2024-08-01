@@ -7,10 +7,12 @@ import json
 from collections import Counter
 from datetime import datetime, timedelta
 import shutil
+from typing import Union
+import pickle
 
 
-
-from data.parser import get_bannds
+from datetime import datetime, timedelta
+from .data.parser import get_bannds
 
 ##########################################################################
 # Handling data storage
@@ -36,26 +38,7 @@ def convert_to_json_serializable(obj):
     except TypeError:
         return str(obj)  # Convert to string as a fallback
 
-def remove_circular_references(obj, seen=None):
-    """
-    Recursively remove circular references from the data.
-    """
-    if seen is None:
-        seen = set()
-    if id(obj) in seen:
-        return None  # Circular reference found; replace with None or a placeholder
-    seen.add(id(obj))
 
-    if isinstance(obj, dict):
-        return {k: remove_circular_references(v, seen) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [remove_circular_references(i, seen) for i in obj]
-    elif isinstance(obj, tuple):
-        return tuple(remove_circular_references(i, seen) for i in obj)
-    elif isinstance(obj, set):
-        return {remove_circular_references(i, seen) for i in obj}
-    
-    return obj
 
 def save_json(data : dict,
               path : str) -> None:
@@ -63,7 +46,6 @@ def save_json(data : dict,
         Storage of band information and... as a Jason file
     """
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    data = remove_circular_references(data)
     with open(path, "w") as json_file:
         json.dump(data, json_file, indent=4, default=convert_to_json_serializable)
 
@@ -99,6 +81,49 @@ def copy_paste(source_file : str,
     shutil.copy2(source_file, destination_dir)
 
 
+
+def fix_date(start_date: datetime, step: int, finish_date: datetime) -> list:
+
+    dates = []
+    current_date = start_date
+
+    # Ensure that start_date and finish_date are datetime objects
+    if isinstance(start_date, str):
+        current_date = datetime.strptime(start_date, "%Y-%m-%d")
+    if isinstance(finish_date, str):
+        finish_date = datetime.strptime(finish_date, "%Y-%m-%d")
+
+    while True:
+        current_date += timedelta(days=step)
+        if current_date > finish_date:
+            break
+        else:
+            dates.append(current_date.strftime("%Y-%m-%d"))
+
+    result = {}
+    for index, element in enumerate(dates):
+        result[index] = element
+        
+    return result
+
+
+def fix_class(class_dict : dict) -> list:
+    list_class = list(set(class_dict.values()))
+    class_index = {}
+    for index, _class in enumerate(list_class):
+        class_index[_class] = index
+    
+    for num_file, _class in class_dict.items():
+        class_dict[num_file] = class_index[_class]
+    
+
+    return class_dict, class_index
+
+
+
+def save_pkl(data : Union[tuple, np.ndarray], path : str) -> None:
+    with open(path, 'wb') as file:
+        pickle.dump(data, file)
 
 
 
@@ -186,7 +211,7 @@ def bands_per_date(df : pd.DataFrame) -> dict:
 
         
     columns= list(df.columns)
-    bands = get_bannds()["s1"] + get_bannds()["s2"] + get_bannds()["geo_features"]
+    bands = get_bannds()["s1"] + get_bannds()["s2"] + get_bannds()["Subscription"]
 
     columns = [col for col in columns if check_column(bands, col)]
     
@@ -212,12 +237,7 @@ def bands_count_per_date(_bands_per_date : dict) -> dict:
         _bands_count_per_date[date] = len(bands)
     return _bands_count_per_date
 
-def check_column(bands : list, 
-          col : str):
-    for band in bands:
-        if band in col.upper():
-            return True
-    return False
+
 
 
 def get_all_dates(bands_per_date : dict) -> list:
@@ -268,10 +288,19 @@ def clean_data(df : pd.DataFrame,
         remove unvalid columns in dataframe 
     """
     
-    valid_column = get_bannds["s1"] + get_bannds["s1"] + get_bannds["geo_features"] + [Class_columns, LatLong_column, block_id]
+    valid_column = get_bannds()["s1"] + get_bannds()["s1"] + get_bannds()["geo_features"] + [Class_columns, block_id] + LatLong_column
 
     for column in df.columns:
-        if column not in valid_column:
+        if not check_column(valid_column, column):
             df = df.drop(column, axis=1)
 
     return df
+
+
+
+def check_column(bands : list, 
+          col : str):
+    for band in bands:
+        if band.upper() in col.upper():
+            return True
+    return False

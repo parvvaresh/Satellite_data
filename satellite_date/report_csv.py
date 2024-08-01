@@ -11,9 +11,9 @@ from utils import (
     point_plot,
     get_all_bands,
     get_all_dates,
-    counter_class
+    counter_class)
 
-)
+
 class report_csv:
     def __init__(self, 
                  df : pd.DataFrame,
@@ -39,12 +39,12 @@ class report_csv:
         total_information = {
             "number of all bands" : len(get_all_bands(bands_per_date_data)),
             "number of all dates" : len(get_all_dates(bands_per_date_data)),
+            "list of bands in all date" : list(set(bands_per_date_data)),
 
         }
         save_json(total_information, path_root + "/total_information.json")
+        print("pkey")
 
         class_count = counter_class(self.df, self.class_column)
         save_json(class_count, path_root + "/class_count.json")
-
-
 
