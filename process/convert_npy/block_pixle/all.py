@@ -4,17 +4,15 @@ from datetime import datetime
 from tqdm import tqdm
 
 
-import sys
-import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '/home/reza/Desktop/Satellite_data')))
+
 
 
 from process.utils import clean_data, create_folder, bands_per_date, get_all_bands, get_all_dates, save_json, fix_date, fix_class
 
 from  utils import * 
 
-class csv_to_npy():
+class csv_to_npy_all():
     def __init__(self,
                  df : pd.DataFrame, 
                  class_column : str,
@@ -38,11 +36,7 @@ class csv_to_npy():
     
     def get_npy(self) -> None:
 
-        root_path = self.path_to_save + "/npy_data_for_all_sentinel_block_pixle"
-        create_folder(root_path)
-        
-        npy_folder = root_path + "/DATA"
-        create_folder(npy_folder)
+
         
         block_pixles = self.df.groupby(self.pixle_id_columns)
         
@@ -54,53 +48,26 @@ class csv_to_npy():
         all_dates = get_all_dates(date_and_band)
         
         
-        extract_information(block_pixles , all_dates , all_bands , date_and_band , npy_folder)
-        class_json, gefeat_json, info_geo = get_meta_data(block_pixles , self.class_column , self.LatLong_column)
-        
-
-        print("saved npy files in path  ")
-
-
-        # saved info dates     
-        date = fix_date(self.start_date ,self.iter, self.finish_date )
-        save_json(info_geo, root_path + "/info_geo.json")
-
-
-
-        class_json , class_info = fix_class(class_json)
-        # saved info class
-        save_json(class_info, root_path + "/info_class.json")
-
-        meta_folder = root_path + "/META"
-        create_folder(meta_folder)
-
-        save_json(class_json, meta_folder + "/class.json")
-        save_json(gefeat_json, meta_folder + "/geo.json")
-        save_json(date, meta_folder + "/date.json")
-
-
-        print("saved  meta files in path  ")
-
-        
-        print("finish convert")
-
-
+        extract_information(block_pixles , all_dates , all_bands , date_and_band , self.path_to_save)
+        class_json, self.gefeat_json, self.info_geo = get_meta_data(block_pixles , self.class_column , self.LatLong_column)
         
 
 
 
+        self.date = fix_date(self.start_date ,self.iter, self.finish_date )
 
 
-df = pd.read_csv("/home/reza/Desktop/abyek_half.csv")
 
-model = csv_to_npy(df, 
-                 "class" ,
-                 ["X", "Y"],
-                 "id_9",
-                 "/home/reza/Desktop/" ,
-                "2023-02-01",
-                "2023-08-01",
-                7,)
+        self.class_json , self.class_info = fix_class(class_json)
 
 
-model.get_npy()
+
+    def get_meta(self):
+        return self.date, self.class_json, self.class_info, self.gefeat_json, self.info_geo
+
+
+
+
+
+
+
