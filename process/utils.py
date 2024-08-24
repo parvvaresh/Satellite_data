@@ -25,8 +25,7 @@ def create_folder(path : str) -> None:
     try:
         os.makedirs(path)
     except FileExistsError:
-        print(f"Folder already exists at {path}")
-
+        pass
 
 
 def convert_to_json_serializable(obj):
@@ -76,10 +75,6 @@ def save_meta_data(path : str,
     
 
 
-def copy_paste(source_file : str,
-               destination_dir : str) -> None:    
-    shutil.copy2(source_file, destination_dir)
-
 
 
 def fix_date(start_date: datetime, step: int, finish_date: datetime) -> list:
@@ -108,10 +103,57 @@ def fix_date(start_date: datetime, step: int, finish_date: datetime) -> list:
 
 
 def fix_class(class_dict : dict) -> list:
-    list_class = list(set(class_dict.values()))
-    class_index = {}
-    for index, _class in enumerate(list_class):
-        class_index[_class] = index
+    class_index = {'WR': 0,
+                    'ot': 1,
+                    'S': 2,
+                    'VS': 3,
+                    'BE': 4,
+                    'PO': 5,
+                    'o': 6,
+                    'SB': 7,
+                    'BR': 8,
+                    'po': 9,
+                    'BI': 10,
+                    'HN': 11,
+                    'PT_a': 12,
+                    'R': 13,
+                    'PT_p': 14,
+                    'NK': 15,
+                    'V': 16,
+                    'C': 17,
+                    's': 18,
+                    'M': 19,
+                    'nk': 20,
+                    'Wr': 21,
+                    'G': 22,
+                    'PT_rod': 23,
+                    'p': 24,
+                    'joob': 25,
+                    'WI': 26,
+                    'B': 27,
+                    'bi': 28,
+                    'PT_stakhar': 29,
+                    'PTWr': 30,
+                    'z': 31,
+                    'P': 32,
+                    'CA': 33,
+                    'OF': 34,
+                    'br': 35,
+                    'wi': 36,
+                    'b': 37,
+                    'A': 38,
+                    'wr': 39,
+                    'c': 40,
+                    'Z': 41,
+                    'Water': 42,
+                    'O': 43,
+                    'TO': 44,
+                    'G-h': 45,
+                    'm': 46,
+                    'OT': 47,
+                    'f': 48,
+                    'FO': 49,
+                    'F': 50}
     
     for num_file, _class in class_dict.items():
         class_dict[num_file] = class_index[_class]
@@ -336,3 +378,41 @@ def mean_std(df : pd.DataFrame) -> None:
     
     result = (mean, std)
     return result
+
+
+
+
+
+def fillna(df: pd.DataFrame) -> pd.DataFrame:
+    _bands_per_date = bands_per_date(df)
+    _all_date = get_all_dates(_bands_per_date)
+    _all_bands = get_all_bands(_bands_per_date) + ["Emis_31", "Emis_32", "BSI", "slope", "max", "min", "mea"]
+
+    save_col = []
+    list_dataframe = []
+
+    for band in _all_bands:
+        temp_cols = [f"{date}_{band}" for date in _all_date if f"{date}_{band}" in df.columns]
+
+        if temp_cols:
+            temp_cols_sorted = sorted(temp_cols, key=lambda col: int(find_date_band(col)[0]))
+            save_col.extend(temp_cols_sorted)
+            band_df = df[temp_cols_sorted].apply(pd.to_numeric, errors='coerce')  
+            band_df = band_df.interpolate(method='linear', axis=1, limit=5, limit_direction='both') 
+            list_dataframe.append(band_df)
+
+    not_change = df.columns.difference(save_col)
+    df_no_change = df[not_change]
+
+    list_dataframe.append(df_no_change)
+    
+    result = pd.concat(list_dataframe, axis=1)
+    
+    return result
+
+
+
+def open_json_file(file_path):
+    with open(file_path, 'r') as json_file:
+        data_dict = json.load(json_file)
+    return data_dict
