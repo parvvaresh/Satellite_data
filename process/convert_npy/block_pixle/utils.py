@@ -12,7 +12,7 @@ def extract_information(block_pixles : pd.DataFrame, all_dates : list, all_bands
     """
 
 
-    for name, df_group in tqdm(block_pixles):
+    for name, df_group in (block_pixles):
         vector = list()
 
         for date in all_dates:
@@ -21,7 +21,7 @@ def extract_information(block_pixles : pd.DataFrame, all_dates : list, all_bands
             vector.append(vector_day)
             
         vector = np.array(vector)
-            
+    
         path =  npy_folder + f"/{name}.npy"
         np.save(path, vector)
 
@@ -31,7 +31,7 @@ def get_meta_data(block_pixles : pd.DataFrame, class_column : str, LatLong_colum
     class_json = {}
     gefeat_json = {}
 
-    for name, df_group in tqdm(block_pixles):
+    for name, df_group in (block_pixles):
         name = str(name)
         _class_sub = df_group[class_column].to_list()[0]
         class_json[name] = _class_sub
@@ -137,3 +137,41 @@ def split_df(df : pd.DataFrame, pixle_id_columns : str) -> list:
 
 
 
+def get_csv(folder_path : str) -> list:
+    csv_files = []
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            if file.endswith('.csv'):
+                full_path = os.path.join(root, file)
+                csv_files.append((file, full_path))
+    return csv_files[ : 1]
+
+
+
+
+
+
+def get_columns(csv_files: list) -> list:
+    columns = set()
+    for _, csv_file in tqdm(csv_files):
+        with open(csv_file, 'r') as f:
+            header = f.readline().strip().split(',')
+            columns.update(header)  
+    print(columns)
+    return list(columns)
+
+
+def merge_csv(empty : pd.DataFrame, df : pd.DataFrame) -> pd.DataFrame:
+
+    dfs = [empty, df]
+
+    merged_df = pd.concat(dfs, ignore_index=True)
+    return merged_df
+
+
+
+def fix_dataset(data : pd.DataFrame, geo_cache : dict) -> pd.DataFrame:
+
+    data[['SA', 'SP', 'SF']] = data['id_fid'].map(lambda x: geo_cache.get(x, (None, None, None))).apply(pd.Series)
+    final_database = pd.concat([group_df for _, group_df in data.groupby(['id_fid', 'id_9'])], ignore_index=True)
+    return final_database
