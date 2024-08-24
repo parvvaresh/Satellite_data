@@ -4,17 +4,13 @@ from datetime import datetime
 from tqdm import tqdm
 
 
-import sys
-import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '/home/reza/Desktop/Satellite_data')))
 
 
 from process.utils import clean_data, create_folder, bands_per_date, get_all_bands, get_all_dates, save_json, fix_date, fix_class, mean_std, save_pkl
 
 from  utils import * 
 
-class csv_to_npy():
+class csv_to_npy_split():
     def __init__(self,
                  df : pd.DataFrame, 
                  class_column : str,
@@ -38,13 +34,12 @@ class csv_to_npy():
     
     def get_npy(self) -> None:
 
-        root_path = self.path_to_save + "/split"
-        create_folder(root_path)
+
         
-        npy_folder_s1 = root_path + "/DATA/S1"
+        npy_folder_s1 = self.path_to_save + "/S1"
         create_folder(npy_folder_s1)
 
-        npy_folder_s2 = root_path + "/DATA/S2"
+        npy_folder_s2 = self.path_to_save + "/S2"
         create_folder(npy_folder_s2)
 
 
@@ -67,61 +62,20 @@ class csv_to_npy():
         extract_information(block_pixles_s1 , all_dates_s1 , all_bands_s1 , date_and_band_s1 , npy_folder_s1)
         extract_information(block_pixles_s2 , all_dates_s2 , all_bands_s2 , date_and_band_s2 , npy_folder_s2)
 
-        class_json, gefeat_json, info_geo = get_meta_data(block_pixles , self.class_column , self.LatLong_column)
+        class_json, self.gefeat_json, self.info_geo = get_meta_data(block_pixles , self.class_column , self.LatLong_column)
         
 
-        
-
-        print("saved npy files in path  ")
-
-
-        # saved info dates     
-        date = fix_date(self.start_date ,self.iter, self.finish_date )
-        save_json(info_geo, root_path + "/info_geo.json")
+    
+        self.date = fix_date(self.start_date ,self.iter, self.finish_date )
 
 
 
-        class_json , class_info = fix_class(class_json)
-        # saved info class
-        save_json(class_info, root_path + "/info_class.json")
-
-        meta_folder = root_path + "/META"
-        create_folder(meta_folder)
-
-        save_json(class_json, meta_folder + "/labels.json")
-        save_json(gefeat_json, meta_folder + "/geomfeat.json")
-        save_json(date, meta_folder + "/dates.json")
-
-
-        print("saved  meta files in path  ")
-
-        # saved mean std files
-
-        mean_std_s1 = mean_std(df_s1)
-        mean_std_s2 = mean_std(df_s2)
-
-        save_pkl(mean_std_s1, root_path + "/mean_std_s1.pkl")
-        save_pkl(mean_std_s2, root_path + "/mean_std_s2.pkl")
-        
-        print("finish convert")
-
-
-        
+        self.class_json , self.class_info = fix_class(class_json)
 
 
 
+    def get_meta(self):
+        return self.date, self.class_json, self.class_info, self.gefeat_json, self.info_geo
 
 
-df = pd.read_csv("/home/reza/Desktop/abyek_half.csv")
 
-model = csv_to_npy(df, 
-                 "class" ,
-                 ["X", "Y"],
-                 "id_9",
-                 "/home/reza/Desktop/" ,
-                "2023-02-01",
-                "2023-08-01",
-                7,)
-
-
-model.get_npy()
