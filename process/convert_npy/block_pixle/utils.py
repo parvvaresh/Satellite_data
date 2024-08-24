@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import os
 
 from process.data.parser import get_bannds
 from process.utils import get_all_dates, bands_per_date
