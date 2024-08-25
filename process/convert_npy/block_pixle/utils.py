@@ -78,26 +78,15 @@ def extract_geo(sub_df : pd.DataFrame, LatLong_column : list) -> None:
     bands_goe = get_bannds()["geo_meta"]
     x , y = LatLong_column
 
-    geo_col = {}
-    for geo in bands_goe:
-        geo_col[geo] = []
-        for col in sub_df.columns:
-            if geo.upper() in col.upper():
-                geo_col[geo].append(col)
-        
     result = {}
-
-    for geo, col in geo_col.items():
-        mean = sub_df[col].mean(axis=1)
-        mean = sum(mean) / mean.shape[0]
-        result[geo] = mean
-        
-    x_mean = sub_df[x].mean()
-    y_mean = sub_df[y].mean()
+    for geo in bands_goe:
+        matching_columns = [col for col in sub_df.columns if geo.upper() in col.upper()]
+        if matching_columns:
+            result[geo] = sub_df[matching_columns].mean(axis=1).mean()
 
         
-    result["x"] = x_mean
-    result["y"] = y_mean
+    result["x"] = sub_df[x].mean()
+    result["y"] = sub_df[x].mean()
 
     return list(result.values()) , list(result.keys())
 
