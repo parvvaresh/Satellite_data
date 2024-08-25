@@ -50,28 +50,6 @@ def save_json(data : dict,
 
 
 
-def save_meta_data(path : str,
-                    df : pd.DataFrame,
-                    geomfeat_columns : list,
-                    class_column : str,
-                    start_date : datetime,
-                    step : int,
-                    iter : int) -> None:
-    pass
-
-    # geomfeat = fix_geomfeat(df , geomfeat_columns)
-    # label = fix_label(df, class_column)
-    # date = fix_date(start_date , step , iter)
-    
-        
-    # save_json(path + "/geomfeat.json", geomfeat)
-    # print("geomfeat METADATA saved successfully")
-        
-    # save_json(path + "/label.json", label)
-    # print("label METADATA saved successfully")
-
-    # save_json(path + "/date.json", date)
-    # print("date METADATA saved successfully")
     
 
 
