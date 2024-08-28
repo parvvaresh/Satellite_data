@@ -6,7 +6,7 @@ import sys
 import os
 
 
-from  utils import (create_folder,
+from  .utils import (create_folder,
                     split_satellite,
                     bands_per_date,
                     get_all_bands,

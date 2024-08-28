@@ -14,7 +14,7 @@ import pickle
 from tqdm import tqdm
 from datetime import datetime, timedelta
 
-from data.parser import get_bannds, get_classindex
+from .data.parser import get_bannds, get_classindex
 
 
 
