@@ -1,8 +1,11 @@
+"""
+    A set of functions written to help convert data into the appropriate format
+"""
+
 import os
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 import json
 from collections import Counter
 from datetime import datetime, timedelta
@@ -306,45 +309,6 @@ def save_pkl(data : Union[tuple, np.ndarray], path : str) -> None:
         pickle.dump(data, file)
 
 
-
-
-
-def point_plot(data : dict,
-               x_lable : str,
-               y_lable : str,
-               title : str,
-               path_to_csv : str,
-               show  : bool = True) -> None:
-    """
-        To illustrate the data: a dot chart that displays the numbers
-    """
-    plt.figure(figsize=(15, 10))
-
-    x = list(data.keys())
-    y = list(data.values())
-    x = list(map(lambda x : str(x), x))
-
-    for _x, _y in zip(x, y):
-        plt.text(_x, _y, f'{_y:.0f}', fontsize=9, ha='center', va='bottom')
-
-    plt.plot(x, y, marker='o', linestyle='--')
-    plt.xlabel(x_lable)
-    plt.ylabel(y_lable)
-    plt.title(title)
-
-    plt.grid(True)
-
-    if show:
-        plt.show()
-
-    if path_to_csv is not None:
-        plt.savefig(path_to_csv)
-
-    plt.close()
-
-
-
-
 def find_date_band(text : str) -> list:
     """
         this founction for find date and band 
@@ -552,14 +516,6 @@ def mean_std(csvs: list, empty_df : pd.DataFrame) -> tuple:
 
     overall_std = np.sqrt(overall_variance)
     return overall_mean, overall_std
-
-
-
-
-
-
-
-
 
 
 def fillna(df: pd.DataFrame) -> pd.DataFrame:
