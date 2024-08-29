@@ -11,7 +11,7 @@ from .to_npy import (csv_to_npy_all,
 
 from .utils import  (create_folder,
                      merge_csv,
-                     fillna,
+                     fillna_with_input,
                      add_geometric,
                      get_columns,
                      save_metadata)
@@ -37,7 +37,7 @@ class convert_data:
         create_folder(self.root_path_split_data)
         print("create folder on path ")
 
-    def fit(self, geoJSON: dict, csv_paths: list, class_column: str, latlong_columns: list, block_column: str, start_date: datetime, finish_date: datetime, interval: int) -> None:
+    def fit(self, geoJSON: dict, csv_paths: list, class_column: str, latlong_columns: list, block_column: str, start_date: datetime, finish_date: datetime, interval: int, fillna_method_value : tuple) -> None:
         self.geo_cache = {element["properties"]["FID"]: (element["properties"]["SA"],
                                                         element["properties"]["SP"],
                                                         element["properties"]["SF"])
@@ -49,6 +49,7 @@ class convert_data:
         self.start_date = start_date
         self.finish_date = finish_date
         self.interval = interval
+        self.fillna_method_value = fillna_method_value
 
         self.class_info_split = None
         self.geo_info_split = None
@@ -69,7 +70,12 @@ class convert_data:
         df = merge_csv(self.empty_df, df)
         if df.shape[0] == 0:
             return None
-        df = fillna(df)
+        
+
+
+        fillna_method, fillna_value  = self.fillna_method_value
+        df = fillna_with_input(fillna_method, fillna_value)
+        
         df = add_geometric(df, self.geo_cache)
         
         # Process 'all'
