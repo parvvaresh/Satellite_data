@@ -1,5 +1,14 @@
 """
-    A set of functions written to help convert data into the appropriate format
+ * In The Name Of God
+ * ========================================
+ * [] File Name : utils.py
+ *
+ * [] Creation Date : 21-12-2014
+ *
+ * [] Last Modified : Tue Jan 27 18:55:07 2015
+ *
+ * [] Created By : Alireza  (parham.alvani@gmail.com)
+ * =======================================
 """
 
 import os
@@ -576,3 +585,22 @@ def open_json_file(file_path : str) -> dict:
     return data_dict
 
 
+def fillna_with_input(df : pd.DataFrame, fillna_method : str, fill_value=None) -> pd.DataFrame:
+    """
+        It fills the missing values ​​based on the user's request
+    """
+    if fillna_method == "negative":
+        df = df.fillna(-1)
+    elif fillna_method == "zero":
+        df = df.fillna(0)
+    elif fillna_method == "interpolate":
+        df = df.interpolate()
+    elif fillna_method == "input":
+        if fill_value is not None:
+            df = df.fillna(fill_value)
+        else:
+            raise ValueError("Fill value must be provided when using 'input' method.")
+    else:
+        raise InterruptedError("No valid fillna_method provided.")
+    
+    return df
