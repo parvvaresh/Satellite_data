@@ -49,19 +49,19 @@ class csv_to_npy_split():
         create_folder(npy_folder_s2)
 
 
-        df_s1, df_s2 = split_satellite(self.df, self.pixle_id_columns)
+        self.df_s1, self.df_s2 = split_satellite(self.df, self.pixle_id_columns)
         block_pixles = self.df.groupby(self.pixle_id_columns)
 
-        block_pixles_s1 = df_s1.groupby(self.pixle_id_columns)
-        block_pixles_s2 = df_s2.groupby(self.pixle_id_columns)
+        block_pixles_s1 = self.df_s1.groupby(self.pixle_id_columns)
+        block_pixles_s2 = self.df_s2.groupby(self.pixle_id_columns)
         
         
         
-        date_and_band_s1 = bands_per_date(df_s1)
+        date_and_band_s1 = bands_per_date(self.df_s1)
         all_bands_s1= get_all_bands(date_and_band_s1)
         all_dates_s1 = get_all_dates(date_and_band_s1)
 
-        date_and_band_s2 = bands_per_date(df_s2)
+        date_and_band_s2 = bands_per_date(self.df_s2)
         all_bands_s2= get_all_bands(date_and_band_s2)
         all_dates_s2 = get_all_dates(date_and_band_s2)
         
@@ -80,8 +80,16 @@ class csv_to_npy_split():
 
 
 
-    def get_meta(self):
+
+    def get_meta(self) -> tuple:
         return self.date, self.class_json, self.class_info, self.gefeat_json, self.info_geo
+    
+
+    def get_s1(self) -> pd.DataFrame:
+        return self.df_s1
+    
+    def get_s2(self) -> pd.DataFrame:
+        return self.df_s2
 
 
 
