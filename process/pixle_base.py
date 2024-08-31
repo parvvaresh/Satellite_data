@@ -1,3 +1,4 @@
+import concurrent.futures
 import os
 import pandas as pd
 import glob
@@ -14,17 +15,13 @@ from utils import (get_csv,
                    fillna,
                    add_geometric)
 
-        
-
-
-
 
 class pixle_base:
-    def __init__(self, root_path : str) -> None:
+    def __init__(self, root_path: str) -> None:
         self.root_path = root_path + "/pixle_base.csv"
         
 
-    def fit(self, geoJSON: dict, csv_paths: list, class_column: str, block_column: str, empty_df : pd.DataFrame) -> None:
+    def fit(self, geoJSON: dict, csv_paths: list, class_column: str, block_column: str, empty_df: pd.DataFrame) -> None:
         self.geo_cache = {element["properties"]["FID"]: (element["properties"]["SA"],
                                                         element["properties"]["SP"],
                                                         element["properties"]["SF"])
@@ -33,48 +30,46 @@ class pixle_base:
         self.csv_paths = csv_paths
         self.class_column = class_column
         self.block_column = block_column
-        self.empty_df = empty_df
-
-
         self.all_columns = get_columns()
+        self.empty_df = pd.DataFrame(columns=self.all_columns)
+    
 
-    def pixle_base(self) -> None:
+    def _transform_dataframe(self, csv: tuple) -> list:
+        path = csv[1]
+        name = csv[0].split(".csv")[0]
 
-
-        
         rows = []
-        for csv in tqdm(self.csv_paths):
-            path = csv[1]
-            name = csv[0].split(".csv")[0]
 
+        df = pd.read_csv(path)
+        df = merge_csv(self.empty_df, df)
+        if df.shape[0] == 0:
+            return []
+        df = add_geometric(df, self.geo_cache)
+        df = fillna(df)
 
+        block_pixles = df.groupby(self.block_column)
 
+        for name, df_group in block_pixles:
+            temp_df_group = df_group.drop(columns=[self.class_column, self.block_column])
+            column_means = temp_df_group.mean()
+
+            means_df = pd.DataFrame([column_means], columns=column_means.index)
+            means_df[self.class_column] = df_group.iloc[0][self.class_column]
+            means_df["id"] = name
+            rows.append(means_df)
         
-
-            df = pd.read_csv(path)
-            df = merge_csv(self.empty_df, df)
-            if df.shape[0] == 0:
-                continue
-            df = add_geometric(df, self.geo_cache)
-            df = fillna(df)
-
-
-
-            block_pixles = df.groupby(self.block_column)
-
-            for name, df_group in (block_pixles):
-                temp_df_group = df_group.drop(columns=[self.class_column, self.block_column])
-                column_means = temp_df_group.mean()
-
-                means_df = pd.DataFrame([column_means], columns=column_means.index)
-                means_df[self.class_column] = df_group.iloc[0][self.class_column]
-                means_df["id"] = name
-                rows.append(means_df)
+        return rows
             
 
-
+    def transform(self, max_workers: int = 16) -> None:
+        rows = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(self._transform_dataframe, csv): csv for csv in self.csv_paths}
+            for future in tqdm(concurrent.futures.as_completed(futures), total=len(self.csv_paths)):
+                result = future.result()
+                if result:
+                    rows.extend(result)
 
         final_database = pd.concat(rows, ignore_index=True)
         final_database = fillna(final_database)
-
-        final_database.to_csv(self.root_path , index=False)
+        final_database.to_csv(self.root_path, index=False)
