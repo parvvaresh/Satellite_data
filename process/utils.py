@@ -38,6 +38,7 @@ def ExtractSave_information(block_pixles : pd.DataFrame, all_dates : list, all_b
         vector = list()
 
         for date in all_dates:
+            print(df_group.shape[0])
             spectrum_vector = create_vector_bands(all_bands , df_group.shape[0])  
             vector_day = make_vector_for_each_date(df_group, date, spectrum_vector, date_and_bands)
             vector.append(vector_day)
@@ -483,51 +484,9 @@ def _mean_std(df: pd.DataFrame) -> tuple:
 
     return mean, std
 
-def mean_std(csvs: list, empty_df : pd.DataFrame) -> tuple:
-    """
-
-    """
-    total_samples = 0
-    mean_sum = None
-    variance_sum = None
-
-    for csv in tqdm(csvs):
-        path = csv[1]
-
-        df = pd.read_csv(path)
-        df = merge_csv(df, empty_df)
-        df = fillna(df)
-        df_s1, df_s2 = split_satellite(df, "id_9")
-
-        mean, std = _mean_std(df_s2)
-
-        if mean.size == 0 or std.size == 0:
-            continue 
-
-        if mean_sum is None:
-            mean_sum = np.zeros_like(mean)
-            variance_sum = np.zeros_like(mean)
-        
-        n_samples = mean.shape[0]  
-
-        mean_sum += mean * n_samples
-        variance_sum += np.power(std, 2) * n_samples
-
-        total_samples += n_samples
-
-    if total_samples == 0:
-        raise ValueError("No valid data available to compute mean and std.")
-
-    overall_mean = mean_sum / total_samples
-
-    overall_variance = variance_sum / total_samples
-    overall_variance = np.maximum(overall_variance, 0)
-
-    overall_std = np.sqrt(overall_variance)
-    return overall_mean, overall_std
 
 
-def fillna(df: pd.DataFrame) -> pd.DataFrame:
+def fillna_interpolate(df: pd.DataFrame) -> pd.DataFrame:
     """
        For each band, we fill in the missing dates with the linear interpolation method using the dates around it 
     """
@@ -587,14 +546,10 @@ def open_json_file(file_path : str) -> dict:
 
 def fillna_with_input(df : pd.DataFrame, fillna_method : str, fill_value=None) -> pd.DataFrame:
     """
-        It fills the missing values ​​based on the user's request
+        It fills the missing values based on the user's request
     """
-    if fillna_method == "negative":
-        df = df.fillna(-1)
-    elif fillna_method == "zero":
-        df = df.fillna(0)
-    elif fillna_method == "interpolate":
-        df = df.interpolate()
+    if fillna_method == "interpolate":
+        df = fillna_interpolate(df)
     elif fillna_method == "input":
         if fill_value is not None:
             df = df.fillna(fill_value)
