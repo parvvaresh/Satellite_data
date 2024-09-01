@@ -9,10 +9,9 @@ import shutil
 from datetime import datetime, timedelta
 
 
-from utils import (get_csv,
+from .utils import (get_csv,
                    get_columns,
                    merge_csv,
-                   fillna,
                    add_geometric)
 
 
@@ -21,7 +20,7 @@ class pixle_base:
         self.root_path = root_path + "/pixle_base.csv"
         
 
-    def fit(self, geoJSON: dict, csv_paths: list, class_column: str, block_column: str, empty_df: pd.DataFrame) -> None:
+    def fit(self, geoJSON: dict, csv_paths: list, class_column: str, block_column: str) -> None:
         self.geo_cache = {element["properties"]["FID"]: (element["properties"]["SA"],
                                                         element["properties"]["SP"],
                                                         element["properties"]["SF"])
@@ -30,7 +29,7 @@ class pixle_base:
         self.csv_paths = csv_paths
         self.class_column = class_column
         self.block_column = block_column
-        self.all_columns = get_columns()
+        self.all_columns = get_columns(csv_paths)
         self.empty_df = pd.DataFrame(columns=self.all_columns)
     
 
@@ -45,7 +44,7 @@ class pixle_base:
         if df.shape[0] == 0:
             return []
         df = add_geometric(df, self.geo_cache)
-        df = fillna(df)
+        df = df.fillna(-1)
 
         block_pixles = df.groupby(self.block_column)
 
@@ -71,5 +70,5 @@ class pixle_base:
                     rows.extend(result)
 
         final_database = pd.concat(rows, ignore_index=True)
-        final_database = fillna(final_database)
+        final_database = final_database.fillna(-1)
         final_database.to_csv(self.root_path, index=False)
