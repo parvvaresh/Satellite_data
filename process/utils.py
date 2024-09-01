@@ -38,7 +38,6 @@ def ExtractSave_information(block_pixles : pd.DataFrame, all_dates : list, all_b
         vector = list()
 
         for date in all_dates:
-            print(df_group.shape[0])
             spectrum_vector = create_vector_bands(all_bands , df_group.shape[0])  
             vector_day = make_vector_for_each_date(df_group, date, spectrum_vector, date_and_bands)
             vector.append(vector_day)
@@ -529,9 +528,6 @@ def merge_csv(empty : pd.DataFrame, df : pd.DataFrame) -> pd.DataFrame:
 
     merged_df = pd.concat(dfs, ignore_index=True)
     return merged_df
-
-
-   
 
 
 
