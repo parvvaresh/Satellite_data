@@ -16,6 +16,9 @@ from  .utils import (create_folder,
                     fix_date,
                     encode_class)
 
+
+from .data.parser import get_bannds
+
 class csv_to_npy_split():
     def __init__(self,
                  df : pd.DataFrame, 
@@ -37,6 +40,9 @@ class csv_to_npy_split():
         self.start_date = start_date
         self.finish_date = finish_date
         self.iter = iter
+        
+        self.all_bands_s1 = get_bannds()["s1"] + get_bannds()["Subscription"]
+        self.all_bands_s2 = get_bannds()["s2"] + get_bannds()["Subscription"]
     
     def get_npy(self) -> None:
 
@@ -58,15 +64,15 @@ class csv_to_npy_split():
         
         
         date_and_band_s1 = bands_per_date(self.df_s1)
-        all_bands_s1= get_all_bands(date_and_band_s1)
         all_dates_s1 = get_all_dates(date_and_band_s1)
 
         date_and_band_s2 = bands_per_date(self.df_s2)
-        all_bands_s2= get_all_bands(date_and_band_s2)
         all_dates_s2 = get_all_dates(date_and_band_s2)
+
+
         
-        ExtractSave_information(block_pixles_s1 , all_dates_s1 , all_bands_s1 , date_and_band_s1 , npy_folder_s1)
-        ExtractSave_information(block_pixles_s2 , all_dates_s2 , all_bands_s2 , date_and_band_s2 , npy_folder_s2)
+        ExtractSave_information(block_pixles_s1 , all_dates_s1 , self.all_bands_s1 , date_and_band_s1 , npy_folder_s1)
+        ExtractSave_information(block_pixles_s2 , all_dates_s2 , self.all_bands_s2 , date_and_band_s2 , npy_folder_s2)
 
         class_json, self.gefeat_json, self.info_geo = get_metadata(block_pixles , self.class_column , self.LatLong_column)
         
@@ -115,6 +121,7 @@ class csv_to_npy_all():
         self.start_date = start_date
         self.finish_date = finish_date
         self.iter = iter
+        self.all_bands = get_bannds()["s1"] + get_bannds()["s2"] + get_bannds()["Subscription"]
     
     def get_npy(self) -> None:
 
@@ -126,11 +133,10 @@ class csv_to_npy_all():
         
         
         date_and_band = bands_per_date(self.df)
-        all_bands= get_all_bands(date_and_band)
         all_dates = get_all_dates(date_and_band)
         
         
-        ExtractSave_information(block_pixles , all_dates , all_bands , date_and_band , self.path_to_save)
+        ExtractSave_information(block_pixles , all_dates , self.all_bands , date_and_band , self.path_to_save)
         class_json, self.gefeat_json, self.info_geo = get_metadata(block_pixles , self.class_column , self.LatLong_column)
         
 
