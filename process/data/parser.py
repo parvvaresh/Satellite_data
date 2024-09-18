@@ -12,9 +12,6 @@ def get_bannds() -> dict:
         spectrums = json.load(json_file)
     return spectrums
 
-
-
-
 def get_classindex() -> dict:
 
     classindex_file = os.path.join(get_path_script(), "classindex.json")
