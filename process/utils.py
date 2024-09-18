@@ -1,16 +1,3 @@
-"""
- * In The Name Of God
- * ========================================
- * [] File Name : utils.py
- *
- * [] Creation Date : 21-12-2014
- *
- * [] Last Modified : Tue Jan 27 18:55:07 2015
- *
- * [] Created By : Alireza  (parham.alvani@gmail.com)
- * =======================================
-"""
-
 import os
 import pandas as pd
 import numpy as np
@@ -60,7 +47,7 @@ def get_metadata(block_pixles : pd.DataFrame, class_column : str, LatLong_column
     for name, df_group in (block_pixles):
         name = str(name)
         class_sub = df_group[class_column].to_list()[0]
-        classes[name] = class_sub
+        classes[name] = class_sub.lower()
 
         geo , info_geo = extract_geo(df_group, LatLong_column)
         geofeat[name] = geo
@@ -190,26 +177,26 @@ def merge_csv(empty_df : pd.DataFrame, df : pd.DataFrame) -> pd.DataFrame:
 
 def add_geometric(data : pd.DataFrame, geo_cache : dict) -> pd.DataFrame:
     """
-
+        Adds geometric data (SA, SP, SF) to the input DataFrame based on 'id_fid'.
     """
     database = []
 
     for id_fid, group_df in data.groupby('id_fid'):
         SA, SP, SF = geo_cache.get(id_fid, (None, None, None))
-        
-        group_df["SA"] = SA
-        group_df["SP"] = SP
-        group_df["SF"] = SF
-        
-        database_90 = []
 
-        for _, group_df_90 in group_df.groupby("id_9"):
-            database_90.append(group_df_90)
-        try:
+        geo_data = pd.DataFrame({
+            "SA": [SA] * len(group_df),
+            "SP": [SP] * len(group_df),
+            "SF": [SF] * len(group_df)
+        })
+
+        group_df = pd.concat([group_df.reset_index(drop=True), geo_data], axis=1)
+
+        database_90 = [group_df_90 for _, group_df_90 in group_df.groupby("id_9")]
+
+        if database_90:
             database.append(pd.concat(database_90, ignore_index=True))
-        except:
-            pass
-    
+
     final_database = pd.concat(database, ignore_index=True)
 
     return final_database
