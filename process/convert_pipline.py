@@ -18,7 +18,6 @@ class ConvertData:
         print("Folders created.")
 
     def _create_folder(self):
-        self.root_path = os.path.join(self.root_path, "data")
         create_folder(self.root_path)
         
         self.root_path_all = os.path.join(self.root_path, "all")
@@ -76,61 +75,66 @@ class ConvertData:
         self.variance_sum_s2 = None
 
     def _transform_dataframe(self, csv: tuple):
-        path = csv[1]
-        name = os.path.splitext(csv[0])[0]
-        df = pd.read_csv(path)
-        df = merge_csv(self.empty_df, df)
-        n_samples = df.shape[0]
+        try:
+            path = csv[1]
+            name = os.path.splitext(csv[0])[0]
+            df = pd.read_csv(path)
+            df = merge_csv(self.empty_df, df)
+            n_samples = df.shape[0]
 
-        if df.shape[0] == 0:
-            return None
+            if df.shape[0] == 0:
+                return None
 
-        fillna_method, fillna_value = self.fillna_method_value
-        df = fillna_with_input(df, fillna_method, fillna_value)
-        df = add_geometric(df, self.geo_cache)
+            fillna_method, fillna_value = self.fillna_method_value
+            df = fillna_with_input(df, fillna_method, fillna_value)
+            df = add_geometric(df, self.geo_cache)
 
-        mean_all, std_all = _mean_std(df)
+            mean_all, std_all = _mean_std(df)
 
-        # Process 'all'
-        model_all = csv_to_npy_all(df,
-                                   self.class_column,
-                                   self.latlong_columns,
-                                   self.block_column,
-                                   self.root_path_all_data,
-                                   self.start_date,
-                                   self.finish_date,
-                                   self.interval)
-        model_all.get_npy()
-        date_all, class_json_all, class_info_all, gefeat_json_all, geo_info_all = model_all.get_meta()
+            # Process 'all'
+            model_all = csv_to_npy_all(df,
+                                    self.class_column,
+                                    self.latlong_columns,
+                                    self.block_column,
+                                    self.root_path_all_data,
+                                    self.start_date,
+                                    self.finish_date,
+                                    self.interval)
+            model_all.get_npy()
+            date_all, class_json_all, class_info_all, gefeat_json_all, geo_info_all = model_all.get_meta()
 
-        # Process 'split'
-        model_split = csv_to_npy_split(df,
-                                       self.class_column,
-                                       self.latlong_columns,
-                                       self.block_column,
-                                       self.root_path_split_data,
-                                       self.start_date,
-                                       self.finish_date,
-                                       self.interval)
-        model_split.get_npy()
-        date_split, class_json_split, class_info_split, gefeat_json_split, geo_info_split = model_split.get_meta()
+            # Process 'split'
+            model_split = csv_to_npy_split(df,
+                                        self.class_column,
+                                        self.latlong_columns,
+                                        self.block_column,
+                                        self.root_path_split_data,
+                                        self.start_date,
+                                        self.finish_date,
+                                        self.interval)
+            model_split.get_npy()
+            date_split, class_json_split, class_info_split, gefeat_json_split, geo_info_split = model_split.get_meta()
 
-        df_s1 = model_split.get_s1()
-        df_s2 = model_split.get_s2()
+            df_s1 = model_split.get_s1()
+            df_s2 = model_split.get_s2()
 
-        mean_s1, std_s1 = _mean_std(df_s1)
-        mean_s2, std_s2 = _mean_std(df_s2)
+            mean_s1, std_s1 = _mean_std(df_s1)
+            mean_s2, std_s2 = _mean_std(df_s2)
 
-        return (date_all, class_json_all, class_info_all, gefeat_json_all, geo_info_all,
-                date_split, class_json_split, class_info_split, gefeat_json_split, geo_info_split, n_samples,
-                mean_all, std_all, mean_s1, std_s1, mean_s2, std_s2)
-
+            return (date_all, class_json_all, class_info_all, gefeat_json_all, geo_info_all,
+                    date_split, class_json_split, class_info_split, gefeat_json_split, geo_info_split, n_samples,
+                    mean_all, std_all, mean_s1, std_s1, mean_s2, std_s2)
+        except Exception as e:
+            return f"Error processing {csv}: {e}"
     def transform(self) -> None:
         print("Start collecting columns of data sets.")
         all_columns = get_columns(self.csv_paths)
         print("Finished collecting columns of data sets.")
         self.empty_df = pd.DataFrame(columns=all_columns)
         print("Start converting data.")
+
+        # Initialize flag to check if any data is processed
+        data_processed = False
 
         with ProcessPoolExecutor() as executor:
             futures = [executor.submit(self._transform_dataframe, csv) for csv in self.csv_paths]
@@ -139,8 +143,11 @@ class ConvertData:
                     result = future.result()
                     if result:
                         (date_all, class_json_all, class_info_all, gefeat_json_all, geo_info_all,
-                         date_split, class_json_split, class_info_split, gefeat_json_split, geo_info_split, n_samples,
-                         mean_all, std_all, mean_s1, std_s1, mean_s2, std_s2) = result
+                        date_split, class_json_split, class_info_split, gefeat_json_split, geo_info_split, n_samples,
+                        mean_all, std_all, mean_s1, std_s1, mean_s2, std_s2) = result
+
+                        # Update the flag indicating data has been processed
+                        data_processed = True
 
                         self.classes_all.update(class_json_all)
                         self.gefeat_all.update(gefeat_json_all)
@@ -171,6 +178,7 @@ class ConvertData:
                             self.mean_sum_s2 = np.zeros_like(mean_s2)
                             self.variance_sum_s2 = np.zeros_like(mean_s2)
 
+                        # Accumulate the sums for mean and variance
                         self.mean_sum_all += mean_all * n_samples
                         self.variance_sum_all += np.power(std_all, 2) * n_samples
 
@@ -183,6 +191,12 @@ class ConvertData:
                 except Exception as e:
                     print(f"An error occurred: {e}")
 
+        # Check if any data was processed before performing further calculations
+        if not data_processed:
+            print("No data was processed, skipping mean and std calculation.")
+            return
+
+        # Perform calculations if data was processed
         overall_mean_all = self.mean_sum_all / self.total_samples_all
         overall_variance_all = self.variance_sum_all / self.total_samples_all
         overall_variance_all = np.maximum(overall_variance_all, 0)
@@ -214,6 +228,12 @@ class ConvertData:
 
         # Save mean and std for S2
         save_pkl((overall_mean_s2, overall_std_s2), f"{self.root_path_split_data}/S2/mean_std.pkl")
+
+        # Save total sample count in a text file
+        with open(f"{self.root_path}/total_samples_all.txt", "w") as file:
+            file.write(str(self.total_samples_all))
+
+        
 
     def MeanStd(self, mean: np.array, std: np.array, n_samples: int) -> tuple:
         """
