@@ -16,7 +16,7 @@ def extract_data(path_tifs, _class, id_fid, path_csv):
         flag = True
         for path_tif, name_tif in info:
             name_tif = name_tif.split(".tif")[0]
-            id_90_90 , id_30_30, id_10_10 = name_tif.split("_")
+            id_block , id_pixle = name_tif.split("_")
 
 
             with rasterio.open(path_tif) as src:        
@@ -32,13 +32,12 @@ def extract_data(path_tifs, _class, id_fid, path_csv):
 
                 if flag and len(band_names) != 0:
 
-                    headers = ["id_fid", 'id_9', 'id_3', 'id_1', "X", "Y", "class"] + band_names
+                    headers = ["id_fid", 'id_block', 'id_pixle', "X", "Y", "class"] + band_names
                     csvwriter.writerow(headers)
                     flag = False
                     print("heades is ok !")
-                id_90_90 = f"{id_90_90}{id_fid}"
 
-                row_data = [id_fid, id_90_90, id_30_30, id_10_10, lon, lat, _class]
+                row_data = [id_fid, id_block, id_pixle, lon, lat, _class]
                 for band_idx in range(data.shape[0]):
                     band_data = data[band_idx, :, :]
                     row_data.append(band_data[0][0])   
