@@ -2,7 +2,7 @@ import concurrent.futures
 import os
 import shutil
 from utils import get_all_tif_files
-from CropImage import CropImage
+from cropImage import CropImage
 from extract_data import extract_data
 
 def process_tif(info : tuple, path_save_tif : str,  path_save_csv : str, size_crop_terrain : int, size_crop_pixle : int):
@@ -17,7 +17,7 @@ def process_tif(info : tuple, path_save_tif : str,  path_save_csv : str, size_cr
     extract_data(os.path.join(path_save_tif_temp, f"{size_crop_pixle}_{size_crop_pixle}"), _class, f_id, path_save_csv)
     shutil.rmtree(path_save_tif_temp)
 
-def main(paht_tifs: str, path_save_tif: str, path_save_csv: str, size_crop_terrain: int, size_crop_pixle: int) -> None:
+def run_process_tif(paht_tifs: str, path_save_tif: str, path_save_csv: str, size_crop_terrain: int, size_crop_pixle: int) -> None:
     tifs = get_all_tif_files(paht_tifs)
 
     num_workers = os.cpu_count()
