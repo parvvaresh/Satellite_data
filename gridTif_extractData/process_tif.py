@@ -1,9 +1,9 @@
 import concurrent.futures
 import os
 import shutil
-from utils import get_all_tif_files
-from cropImage import CropImage
-from extract_data import extract_data
+from .utils import get_all_tif_files
+from .cropImage import CropImage
+from .extract_data import extract_data
 
 def process_tif(info : tuple, path_save_tif : str,  path_save_csv : str, size_crop_terrain : int, size_crop_pixle : int):
     path, name = info

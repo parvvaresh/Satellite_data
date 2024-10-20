@@ -1,7 +1,7 @@
 import os
 from osgeo import gdal
 import rasterio
-from utils import get_all_tif_files, make_folder
+from .utils import get_all_tif_files, make_folder
 
 class CropImage:
     def __init__(self, path_tif_file: str, size_crop_block: int, size_crop_pixle: int, path_to_save: str) -> None:

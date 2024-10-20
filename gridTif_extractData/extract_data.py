@@ -3,7 +3,7 @@ import csv
 import numpy as np
 import rasterio
 
-from utils import (get_all_tif_files, 
+from .utils import (get_all_tif_files, 
                    convert_pixel_value_to_geographic_coordinate, 
                    count_nan)
 
@@ -31,13 +31,14 @@ def extract_data(path_tifs, _class, id_fid, path_csv):
 
 
                 if flag and len(band_names) != 0:
+                    unique_block_id = id_fid + id_block
 
-                    headers = ["id_fid", 'id_block', 'id_pixle', "X", "Y", "class"] + band_names
+                    headers = ["id_fid", 'id_block', 'id_pixle', "unique_block_id", "X", "Y", "class"] + band_names
                     csvwriter.writerow(headers)
                     flag = False
                     print("heades is ok !")
 
-                row_data = [id_fid, id_block, id_pixle, lon, lat, _class]
+                row_data = [id_fid, id_block, id_pixle, unique_block_id,lon, lat, _class]
                 for band_idx in range(data.shape[0]):
                     band_data = data[band_idx, :, :]
                     row_data.append(band_data[0][0])   
