@@ -34,11 +34,3 @@ def run_process_tif(paht_tifs: str, path_save_tif: str, path_save_csv: str, size
                 future.result()
             except Exception as e:
                 print(f"Error occurred: {e}")
-
-main(
-    paht_tifs="/home/reza/test_tif",
-    path_save_tif="/home/reza/tifs_garbage/tifs",
-    path_save_csv="/home/reza/csv",
-    size_crop_terrain=9,
-    size_crop_pixle=1
-)
